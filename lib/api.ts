@@ -1,7 +1,22 @@
 import * as SecureStore from 'expo-secure-store'
+import Constants from 'expo-constants'
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, '')
 const TOKEN_KEY = 'skedyul-faculty-api-token'
+
+/** Use an explicit server URL for deployed builds, or the Expo host on local development. */
+function apiBaseUrl() {
+  const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, '')
+  if (configuredUrl) return configuredUrl
+
+  const expoHost = Constants.expoConfig?.hostUri?.split(':')[0]
+  if (expoHost) return `http://${expoHost}:8000`
+
+  if (typeof window !== 'undefined' && window.location.hostname) {
+    return `http://${window.location.hostname}:8000`
+  }
+
+  return null
+}
 
 export type FacultySchedule = {
   id: string
@@ -76,10 +91,11 @@ export class ApiError extends Error {
 }
 
 function apiUrl(path: string) {
-  if (!API_BASE_URL) {
-    throw new Error('Set EXPO_PUBLIC_API_URL to your reachable Skedyul server address.')
+  const baseUrl = apiBaseUrl()
+  if (!baseUrl) {
+    throw new Error('Could not find the Skedyul server address. Start Expo on the same Wi-Fi as Laravel, or set EXPO_PUBLIC_API_URL for a deployed server.')
   }
-  return `${API_BASE_URL}/api${path}`
+  return `${baseUrl}/api${path}`
 }
 
 /** Repair local Laravel asset URLs (`localhost`/loopback) for a phone on the same LAN. */
@@ -87,7 +103,9 @@ export function facultyImageUrl(value?: string | null) {
   if (!value) return null
   try {
     const image = new URL(value)
-    const apiOrigin = new URL(API_BASE_URL || '')
+    const baseUrl = apiBaseUrl()
+    if (!baseUrl) return value
+    const apiOrigin = new URL(baseUrl)
     if (['localhost', '127.0.0.1', '::1'].includes(image.hostname)) {
       image.host = apiOrigin.host
       image.protocol = apiOrigin.protocol
