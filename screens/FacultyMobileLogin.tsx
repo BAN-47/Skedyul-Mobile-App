@@ -7,7 +7,7 @@ import { PrimaryButton } from '../components/PrimaryButton'
 import { styles } from '../styles/facultyStyles'
 
 /** Faculty sign-in screen. Login requests are handled by the Laravel API. */
-export function FacultyMobileLogin({ busy, error, onSignIn }: { busy: boolean; error: string; onSignIn: (email: string, password: string) => Promise<void> }) {
+export function FacultyMobileLogin({ busy, error, biometricEnabled, onSignIn, onBiometricSignIn }: { busy: boolean; error: string; biometricEnabled: boolean; onSignIn: (email: string, password: string) => Promise<void>; onBiometricSignIn: () => Promise<void> }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -35,6 +35,7 @@ export function FacultyMobileLogin({ busy, error, onSignIn }: { busy: boolean; e
             </View>
             {error ? <ErrorBanner message={error} /> : null}
             <PrimaryButton title="Sign in" busy={busy} onPress={() => void onSignIn(email, password)} />
+            {biometricEnabled ? <PrimaryButton title="Sign in with biometrics" busy={busy} onPress={() => void onBiometricSignIn()} /> : null}
             <Text style={styles.facultyOnly}>Faculty profile required · No sign-up from this app</Text>
           </View>
           <Text style={styles.footerText}>Skedyul · Faculty schedule access</Text>

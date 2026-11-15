@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ApiError, clearSavedToken, getDashboard, getSavedToken, removeFacultyPhoto as apiRemoveFacultyPhoto, saveContactInfo, saveNotificationPreferences, savePersonalInfo, saveSecuritySettings, signIn as apiSignIn, signOut as apiSignOut, updatePassword, uploadFacultyPhoto as apiUploadFacultyPhoto, type FacultyDashboard } from '../lib/api'
+import { ApiError, clearSavedToken, getBiometricSignInEnabled, getDashboard, getSavedToken, removeFacultyPhoto as apiRemoveFacultyPhoto, saveContactInfo, saveNotificationPreferences, savePersonalInfo, saveSecuritySettings, setBiometricSignIn as apiSetBiometricSignIn, signIn as apiSignIn, signOut as apiSignOut, updatePassword, uploadFacultyPhoto as apiUploadFacultyPhoto, type FacultyDashboard } from '../lib/api'
 import { getErrorMessage } from '../utils/errors'
 
 /** Authentication, token restoration, dashboard loading, and refresh behavior. */
@@ -10,6 +10,7 @@ export function useFacultySession() {
   const [busy, setBusy] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
+  const [biometricEnabled, setBiometricEnabled] = useState(false)
 
   const loadDashboard = useCallback(async (accessToken: string) => {
     const result = await getDashboard(accessToken)
@@ -21,6 +22,8 @@ export function useFacultySession() {
     let mounted = true
     async function restoreSession() {
       try {
+        const biometricIsEnabled = await getBiometricSignInEnabled()
+        if (mounted) setBiometricEnabled(biometricIsEnabled)
         const savedToken = await getSavedToken()
         if (!savedToken) return
         if (mounted) setToken(savedToken)
@@ -29,7 +32,10 @@ export function useFacultySession() {
       } catch (cause) {
         if (cause instanceof ApiError && cause.status === 401) {
           await clearSavedToken()
-          if (mounted) setToken(null)
+          if (mounted) {
+            setToken(null)
+            setBiometricEnabled(false)
+          }
         } else if (mounted) setError(getErrorMessage(cause))
       } finally {
         if (mounted) setRestoring(false)
@@ -44,6 +50,7 @@ export function useFacultySession() {
     setError('')
     try {
       const accessToken = await apiSignIn(email.trim(), password)
+      setBiometricEnabled(false)
       setToken(accessToken)
       await loadDashboard(accessToken)
     } catch (cause) {
@@ -52,6 +59,31 @@ export function useFacultySession() {
       setBusy(false)
     }
   }, [loadDashboard])
+
+  const signInWithBiometrics = useCallback(async () => {
+    setBusy(true)
+    setError('')
+    try {
+      const accessToken = await getSavedToken()
+      if (!accessToken) throw new Error('No saved mobile sign-in was found. Sign in with your password first.')
+      setToken(accessToken)
+      await loadDashboard(accessToken)
+    } catch (cause) {
+      if (cause instanceof ApiError && cause.status === 401) {
+        await clearSavedToken()
+        setBiometricEnabled(false)
+      }
+      setError(getErrorMessage(cause))
+    } finally {
+      setBusy(false)
+    }
+  }, [loadDashboard])
+
+  const toggleBiometricSignIn = useCallback(async (enabled: boolean) => {
+    if (!token) throw new Error('Sign in again before changing biometric sign-in.')
+    await apiSetBiometricSignIn(token, enabled)
+    setBiometricEnabled(enabled)
+  }, [token])
 
   const signOut = useCallback(async () => {
     setBusy(true)
@@ -63,6 +95,7 @@ export function useFacultySession() {
       await clearSavedToken()
       setToken(null)
       setDashboard(null)
+      setBiometricEnabled(false)
       setError('')
       setBusy(false)
     }
@@ -116,5 +149,5 @@ export function useFacultySession() {
     await loadDashboard(token)
   }, [loadDashboard, token])
 
-  return { token, dashboard, restoring, busy, refreshing, error, signIn, signOut, refresh, saveProfile, changePassword, saveSecurity, saveNotifications, uploadFacultyPhoto, removeFacultyPhoto }
+  return { token, dashboard, restoring, busy, refreshing, error, biometricEnabled, signIn, signInWithBiometrics, toggleBiometricSignIn, signOut, refresh, saveProfile, changePassword, saveSecurity, saveNotifications, uploadFacultyPhoto, removeFacultyPhoto }
 }
