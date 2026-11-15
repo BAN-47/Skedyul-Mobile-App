@@ -34,6 +34,8 @@ export default function SkedyulFacultyApp() {
         onSaveProfile={session.saveProfile}
         onChangePassword={session.changePassword}
         onSaveSecurity={session.saveSecurity}
+        biometricEnabled={session.biometricEnabled}
+        onToggleBiometricSignIn={session.toggleBiometricSignIn}
         onSaveNotifications={session.saveNotifications}
         onUploadFacultyPhoto={session.uploadFacultyPhoto}
         onRemoveFacultyPhoto={session.removeFacultyPhoto}
@@ -71,5 +73,5 @@ export default function SkedyulFacultyApp() {
     )
   }
 
-  return <FacultyMobileLogin busy={session.busy} error={session.error} onSignIn={session.signIn} />
+  return <FacultyMobileLogin busy={session.busy} error={session.error} biometricEnabled={session.biometricEnabled} onSignIn={session.signIn} onBiometricSignIn={session.signInWithBiometrics} />
 }

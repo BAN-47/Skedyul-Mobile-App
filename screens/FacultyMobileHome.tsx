@@ -16,7 +16,7 @@ import { COLORS, styles } from '../styles/facultyStyles'
 type FacultyTab = 'schedule' | 'subjects' | 'notifications'
 
 /** Shared faculty layout: header, the selected faculty screen, and bottom navigation. */
-export function FacultyMobileHome({ dashboard, busy, refreshing, error, onRefresh, onSignOut, onSaveProfile, onChangePassword, onSaveSecurity, onSaveNotifications, onUploadFacultyPhoto, onRemoveFacultyPhoto }: {
+export function FacultyMobileHome({ dashboard, busy, refreshing, error, onRefresh, onSignOut, onSaveProfile, onChangePassword, onSaveSecurity, biometricEnabled, onToggleBiometricSignIn, onSaveNotifications, onUploadFacultyPhoto, onRemoveFacultyPhoto }: {
   dashboard: FacultyDashboard
   busy: boolean
   refreshing: boolean
@@ -26,6 +26,8 @@ export function FacultyMobileHome({ dashboard, busy, refreshing, error, onRefres
   onSaveProfile: (personal: Record<string, unknown>, contact: Record<string, unknown>) => Promise<void>
   onChangePassword: (data: { current_password: string; new_password: string; new_password_confirmation: string }) => Promise<void>
   onSaveSecurity: (data: { usr_session_timeout_minutes: number; usr_max_login_attempts: number }) => Promise<void>
+  biometricEnabled: boolean
+  onToggleBiometricSignIn: (enabled: boolean) => Promise<void>
   onSaveNotifications: (data: Record<string, boolean>) => Promise<void>
   onUploadFacultyPhoto: (uri: string, fileName: string, mimeType: string) => Promise<void>
   onRemoveFacultyPhoto: () => Promise<void>
@@ -50,7 +52,7 @@ export function FacultyMobileHome({ dashboard, busy, refreshing, error, onRefres
         <BottomNavigation activeTab={tab} onChangeTab={setTab} />
         {profileOpen ? <ProfileMenu dashboard={dashboard} busy={busy} onClose={() => setProfileOpen(false)} onSettings={() => { setProfileOpen(false); setSettingsOpen(true) }} onSignOut={() => void onSignOut()} /> : null}
         {summaryOpen ? <ScheduleSummarySheet dashboard={dashboard} onClose={() => setSummaryOpen(false)} /> : null}
-        {settingsOpen ? <FacultyMobileSettings dashboard={dashboard} onClose={() => setSettingsOpen(false)} onSaveProfile={onSaveProfile} onChangePassword={onChangePassword} onSaveSecurity={onSaveSecurity} onSaveNotifications={onSaveNotifications} onUploadFacultyPhoto={onUploadFacultyPhoto} onRemoveFacultyPhoto={onRemoveFacultyPhoto} /> : null}
+        {settingsOpen ? <FacultyMobileSettings dashboard={dashboard} onClose={() => setSettingsOpen(false)} onSaveProfile={onSaveProfile} onChangePassword={onChangePassword} onSaveSecurity={onSaveSecurity} biometricEnabled={biometricEnabled} onToggleBiometricSignIn={onToggleBiometricSignIn} onSaveNotifications={onSaveNotifications} onUploadFacultyPhoto={onUploadFacultyPhoto} onRemoveFacultyPhoto={onRemoveFacultyPhoto} /> : null}
       </View>
     </SafeAreaView>
   )

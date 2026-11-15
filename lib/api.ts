@@ -1,22 +1,36 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecureStore from 'expo-secure-store'
+import * as LocalAuthentication from 'expo-local-authentication'
+import Constants from 'expo-constants'
 import { Platform } from 'react-native'
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, '')
 const TOKEN_KEY = 'skedyul-faculty-api-token'
-
-function getWebSessionStorage() {
-  if (typeof window === 'undefined') {
-    throw new Error('Browser session storage is unavailable.')
-  }
-  return window.sessionStorage
+const BIOMETRIC_TOKEN_KEY = 'skedyul-faculty-biometric-token'
+const BIOMETRIC_ENABLED_KEY = 'skedyul-faculty-biometric-enabled'
+const BIOMETRIC_TOKEN_OPTIONS = {
+  requireAuthentication: true,
+  authenticationPrompt: 'Verify to unlock your SKEDYUL sign-in',
 }
 
-async function saveToken(token: string) {
-  if (Platform.OS === 'web') {
-    getWebSessionStorage().setItem(TOKEN_KEY, token)
-    return
+const storage = {
+  getItem: async (key: string) => Platform.OS === 'web' ? await AsyncStorage.getItem(key) : await SecureStore.getItemAsync(key),
+  setItem: async (key: string, value: string) => Platform.OS === 'web' ? await AsyncStorage.setItem(key, value) : await SecureStore.setItemAsync(key, value),
+  removeItem: async (key: string) => Platform.OS === 'web' ? await AsyncStorage.removeItem(key) : await SecureStore.deleteItemAsync(key),
+}
+
+/** Use an explicit server URL for deployed builds, or the Expo host on local development. */
+function apiBaseUrl() {
+  const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, '')
+  if (configuredUrl) return configuredUrl
+
+  const expoHost = Constants.expoConfig?.hostUri?.split(':')[0]
+  if (expoHost) return `http://${expoHost}:8000`
+
+  if (typeof window !== 'undefined' && window.location.hostname) {
+    return `http://${window.location.hostname}:8000`
   }
-  await SecureStore.setItemAsync(TOKEN_KEY, token)
+
+  return null
 }
 
 export type FacultySchedule = {
@@ -92,10 +106,11 @@ export class ApiError extends Error {
 }
 
 function apiUrl(path: string) {
-  if (!API_BASE_URL) {
-    throw new Error('Set EXPO_PUBLIC_API_URL to your reachable Skedyul server address.')
+  const baseUrl = apiBaseUrl()
+  if (!baseUrl) {
+    throw new Error('Could not find the Skedyul server address. Start Expo on the same Wi-Fi as Laravel, or set EXPO_PUBLIC_API_URL for a deployed server.')
   }
-  return `${API_BASE_URL}/api${path}`
+  return `${baseUrl}/api${path}`
 }
 
 /** Repair local Laravel asset URLs (`localhost`/loopback) for a phone on the same LAN. */
@@ -103,7 +118,9 @@ export function facultyImageUrl(value?: string | null) {
   if (!value) return null
   try {
     const image = new URL(value)
-    const apiOrigin = new URL(API_BASE_URL || '')
+    const baseUrl = apiBaseUrl()
+    if (!baseUrl) return value
+    const apiOrigin = new URL(baseUrl)
     if (['localhost', '127.0.0.1', '::1'].includes(image.hostname)) {
       image.host = apiOrigin.host
       image.protocol = apiOrigin.protocol
@@ -131,6 +148,47 @@ async function authorizedRequest<T>(token: string, path: string, data: unknown) 
   return parseResponse<T>(response)
 }
 
+export async function getBiometricSignInEnabled() {
+  if (Platform.OS === 'web') return false
+  return (await storage.getItem(BIOMETRIC_ENABLED_KEY)) === 'true'
+}
+
+export async function setBiometricSignIn(token: string, enabled: boolean) {
+  if (Platform.OS === 'web') throw new Error('Biometric sign-in is available in the mobile app only.')
+
+  if (enabled) {
+    if (!(await LocalAuthentication.hasHardwareAsync())) {
+      throw new Error('This device does not have a supported fingerprint or face sensor.')
+    }
+    if (!(await LocalAuthentication.isEnrolledAsync())) {
+      throw new Error('Set up fingerprint or face unlock in your device settings first.')
+    }
+    if (!SecureStore.canUseBiometricAuthentication()) {
+      throw new Error('This device cannot securely protect biometric sign-in.')
+    }
+
+    if (Platform.OS === 'ios') {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Enable biometric sign-in for SKEDYUL',
+        disableDeviceFallback: false,
+      })
+      if (!result.success) throw new Error('Biometric setup was cancelled. Try again when you are ready.')
+    }
+
+    await SecureStore.setItemAsync(BIOMETRIC_TOKEN_KEY, token, BIOMETRIC_TOKEN_OPTIONS)
+    await SecureStore.setItemAsync(BIOMETRIC_ENABLED_KEY, 'true')
+    await SecureStore.deleteItemAsync(TOKEN_KEY)
+    return
+  }
+
+  await SecureStore.setItemAsync(TOKEN_KEY, token)
+  await SecureStore.setItemAsync(BIOMETRIC_ENABLED_KEY, 'false')
+  try {
+    await SecureStore.deleteItemAsync(BIOMETRIC_TOKEN_KEY, BIOMETRIC_TOKEN_OPTIONS)
+  } catch {
+  }
+}
+
 export async function signIn(email: string, password: string) {
   const response = await fetch(apiUrl('/mobile/faculty/login'), {
     method: 'POST',
@@ -138,7 +196,8 @@ export async function signIn(email: string, password: string) {
     body: JSON.stringify({ email, password, device_name: 'Skedyul Faculty Mobile' }),
   })
   const result = await parseResponse<{ token: string }>(response)
-  await saveToken(result.token)
+  await storage.setItem(BIOMETRIC_ENABLED_KEY, 'false')
+  await storage.setItem(TOKEN_KEY, result.token)
   return result.token
 }
 
@@ -201,16 +260,13 @@ export async function signOut(token: string) {
 }
 
 export async function getSavedToken() {
-  if (Platform.OS === 'web') {
-    return getWebSessionStorage().getItem(TOKEN_KEY)
+  if (await getBiometricSignInEnabled()) {
+    return SecureStore.getItemAsync(BIOMETRIC_TOKEN_KEY, BIOMETRIC_TOKEN_OPTIONS)
   }
-  return SecureStore.getItemAsync(TOKEN_KEY)
+  return storage.getItem(TOKEN_KEY)
 }
 
 export async function clearSavedToken() {
-  if (Platform.OS === 'web') {
-    getWebSessionStorage().removeItem(TOKEN_KEY)
-    return
-  }
-  await SecureStore.deleteItemAsync(TOKEN_KEY)
+  await storage.setItem(BIOMETRIC_ENABLED_KEY, 'false')
+  await storage.removeItem(TOKEN_KEY)
 }

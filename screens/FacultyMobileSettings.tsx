@@ -10,12 +10,14 @@ type PersonalInfo = Record<string, unknown>
 type ContactInfo = Record<string, unknown>
 
 /** Editable faculty settings form. Saves are sent to the Laravel mobile API. */
-export function FacultyMobileSettings({ dashboard, onClose, onSaveProfile, onChangePassword, onSaveSecurity, onSaveNotifications, onUploadFacultyPhoto, onRemoveFacultyPhoto }: {
+export function FacultyMobileSettings({ dashboard, onClose, onSaveProfile, onChangePassword, onSaveSecurity, biometricEnabled, onToggleBiometricSignIn, onSaveNotifications, onUploadFacultyPhoto, onRemoveFacultyPhoto }: {
   dashboard: FacultyDashboard
   onClose: () => void
   onSaveProfile: (personal: PersonalInfo, contact: ContactInfo) => Promise<void>
   onChangePassword: (data: { current_password: string; new_password: string; new_password_confirmation: string }) => Promise<void>
   onSaveSecurity: (data: { usr_session_timeout_minutes: number; usr_max_login_attempts: number }) => Promise<void>
+  biometricEnabled: boolean
+  onToggleBiometricSignIn: (enabled: boolean) => Promise<void>
   onSaveNotifications: (data: Record<string, boolean>) => Promise<void>
   onUploadFacultyPhoto: (uri: string, fileName: string, mimeType: string) => Promise<void>
   onRemoveFacultyPhoto: () => Promise<void>
@@ -191,6 +193,11 @@ export function FacultyMobileSettings({ dashboard, onClose, onSaveProfile, onCha
             <SaveButton title="Update Password" busy={saving} onPress={savePassword} />
           </View>
           <View style={styles.settingsCard}>
+            <Text style={styles.settingsCardTitle}>Biometric Sign-In</Text>
+            <Text style={styles.settingsCardSubtitle}>Use this device’s fingerprint or face unlock for your saved mobile session. SKEDYUL never receives your biometric data.</Text>
+            <NotificationToggle title="Use biometrics to sign in" description="Your device may offer its screen-lock fallback." value={biometricEnabled} disabled={saving} onChange={enabled => void save(() => onToggleBiometricSignIn(enabled), enabled ? 'Biometric sign-in was enabled on this device.' : 'Biometric sign-in was disabled.')} />
+          </View>
+          <View style={styles.settingsCard}>
             <Text style={styles.settingsCardTitle}>Session Settings</Text>
             <Text style={styles.settingsCardSubtitle}>Manage your login preferences</Text>
             <ChoiceField label="Session Timeout" value={timeout} displayValue={timeout === '999999' ? 'Never' : timeout === '60' ? '1 hour' : `${timeout} minutes`} options={['15', '30', '60', '999999']} displayOptions={['15 minutes', '30 minutes', '1 hour', 'Never']} onChange={setTimeoutValue} />
@@ -249,8 +256,8 @@ function ChoiceField({ label, value, options, displayValue, displayOptions, onCh
   })}</View>{displayValue ? <Text style={styles.currentChoice}>Selected: {displayValue}</Text> : null}</View>
 }
 
-function NotificationToggle({ title, description, value, onChange }: { title: string; description: string; value: boolean; onChange: (value: boolean) => void }) {
-  return <View style={styles.notificationSetting}><View style={{ flex: 1, paddingRight: 10 }}><Text style={styles.notificationSettingTitle}>{title}</Text><Text style={styles.notificationSettingDescription}>{description}</Text></View><Switch value={value} onValueChange={onChange} trackColor={{ false: '#CBD5E1', true: COLORS.blue }} thumbColor={COLORS.white} /></View>
+function NotificationToggle({ title, description, value, onChange, disabled = false }: { title: string; description: string; value: boolean; onChange: (value: boolean) => void; disabled?: boolean }) {
+  return <View style={styles.notificationSetting}><View style={{ flex: 1, paddingRight: 10 }}><Text style={styles.notificationSettingTitle}>{title}</Text><Text style={styles.notificationSettingDescription}>{description}</Text></View><Switch disabled={disabled} value={value} onValueChange={onChange} trackColor={{ false: '#CBD5E1', true: COLORS.blue }} thumbColor={COLORS.white} /></View>
 }
 
 function SaveButton({ title, busy, onPress }: { title: string; busy: boolean; onPress: () => void }) {
