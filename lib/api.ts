@@ -1,7 +1,23 @@
 import * as SecureStore from 'expo-secure-store'
+import { Platform } from 'react-native'
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, '')
 const TOKEN_KEY = 'skedyul-faculty-api-token'
+
+function getWebSessionStorage() {
+  if (typeof window === 'undefined') {
+    throw new Error('Browser session storage is unavailable.')
+  }
+  return window.sessionStorage
+}
+
+async function saveToken(token: string) {
+  if (Platform.OS === 'web') {
+    getWebSessionStorage().setItem(TOKEN_KEY, token)
+    return
+  }
+  await SecureStore.setItemAsync(TOKEN_KEY, token)
+}
 
 export type FacultySchedule = {
   id: string
@@ -122,7 +138,7 @@ export async function signIn(email: string, password: string) {
     body: JSON.stringify({ email, password, device_name: 'Skedyul Faculty Mobile' }),
   })
   const result = await parseResponse<{ token: string }>(response)
-  await SecureStore.setItemAsync(TOKEN_KEY, result.token)
+  await saveToken(result.token)
   return result.token
 }
 
@@ -180,14 +196,21 @@ export async function signOut(token: string) {
     })
     await parseResponse<{ message: string }>(response)
   } finally {
-    await SecureStore.deleteItemAsync(TOKEN_KEY)
+    await clearSavedToken()
   }
 }
 
-export function getSavedToken() {
+export async function getSavedToken() {
+  if (Platform.OS === 'web') {
+    return getWebSessionStorage().getItem(TOKEN_KEY)
+  }
   return SecureStore.getItemAsync(TOKEN_KEY)
 }
 
-export function clearSavedToken() {
-  return SecureStore.deleteItemAsync(TOKEN_KEY)
+export async function clearSavedToken() {
+  if (Platform.OS === 'web') {
+    getWebSessionStorage().removeItem(TOKEN_KEY)
+    return
+  }
+  await SecureStore.deleteItemAsync(TOKEN_KEY)
 }

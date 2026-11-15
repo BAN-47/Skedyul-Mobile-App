@@ -1,45 +1,184 @@
-import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { StatusBar } from 'expo-status-bar'
-import { ErrorBanner } from '../components/ErrorBanner'
-import { PrimaryButton } from '../components/PrimaryButton'
-import { styles } from '../styles/facultyStyles'
+import { useState } from "react";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
+import { ErrorBanner } from "../components/ErrorBanner";
+import { loginStyles as s } from "../styles/loginStyles.ts";
 
-/** Faculty sign-in screen. Login requests are handled by the Laravel API. */
-export function FacultyMobileLogin({ busy, error, onSignIn }: { busy: boolean; error: string; onSignIn: (email: string, password: string) => Promise<void> }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
+export function FacultyMobileLogin({
+  busy,
+  error,
+  onSignIn,
+}: {
+  busy: boolean;
+  error: string;
+  onSignIn: (email: string, password: string) => Promise<void>;
+}) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [focused, setFocused] = useState<"email" | "password" | null>(null);
+
+  const submit = () => void onSignIn(email, password);
+  const openSignup = async () => {
+    try {
+      await Linking.openURL("http://localhost/Skedyul/public/register");
+    } catch (error) {
+      console.error("Could not open the SKEDYUL registration page.", error);
+      Alert.alert(
+        "Unable to open sign up",
+        "Make sure the SKEDYUL website is running in XAMPP, then try again.",
+      );
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.signInSafe}>
+    <SafeAreaView style={s.safe} edges={["top"]}>
       <StatusBar style="light" />
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.signInScroll} keyboardShouldPersistTaps="handled">
-          <View style={styles.signInTop}>
-            <Text style={styles.loginLogo}>SKED<Text style={styles.loginLogoAccent}>YUL</Text></Text>
-            <Text style={styles.loginPortal}>FACULTY PORTAL</Text>
+      <KeyboardAvoidingView
+        style={s.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          style={s.scroll}
+          contentContainerStyle={s.scrollContent}
+          keyboardShouldPersistTaps="always"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Branding (web left panel) */}
+          <View style={s.hero}>
+            <View style={[s.circle, s.circleTop]} />
+            <View style={[s.circle, s.circleBottom]} />
+            <Text style={s.logo}>
+              SKED<Text style={s.logoAccent}>YUL</Text>
+            </Text>
+            <Text style={s.tagline}>FACULTY SCHEDULING SYSTEM</Text>
+            <View style={s.badge}>
+              <Text style={s.badgeTitle}>
+                College of Computing, Information and Communications Technology
+              </Text>
+              <Text style={s.badgeSub}>
+                Cebu Technological University · Main Campus
+              </Text>
+            </View>
           </View>
-          <View style={styles.signInCard}>
-            <Text style={styles.cardTitle}>Welcome back</Text>
-            <Text style={styles.cardSubtitle}>Sign in with your Skedyul faculty account.</Text>
-            <Text style={styles.inputLabel}>Email address</Text>
-            <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="name@school.edu" placeholderTextColor="#9AA4B5" autoCapitalize="none" autoComplete="email" keyboardType="email-address" textContentType="emailAddress" editable={!busy} returnKeyType="next" />
-            <Text style={[styles.inputLabel, styles.passwordLabel]}>Password</Text>
-            <View style={styles.signInPasswordRow}>
-              <TextInput style={styles.signInPasswordInput} value={password} onChangeText={setPassword} placeholder="Enter your password" placeholderTextColor="#9AA4B5" autoCapitalize="none" secureTextEntry={!showPassword} textContentType="password" editable={!busy} onSubmitEditing={() => void onSignIn(email, password)} returnKeyType="go" />
-              <Pressable onPress={() => setShowPassword(value => !value)} style={styles.passwordEyeButton} accessibilityRole="button" accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}>
-                <Text style={styles.passwordEyeText}>{showPassword ? '◎' : '◉'}</Text>
+
+          {/* Form (web right panel) */}
+          <View style={s.form}>
+            <Text style={s.loginTitle}>
+              LOG<Text style={s.loginTitleAccent}>IN</Text>
+            </Text>
+            <Text style={s.subtitle}>
+              Sign in to your SKEDYUL account to continue.
+            </Text>
+            <Text style={s.label}>
+              Email Address <Text style={s.required}>*</Text>
+            </Text>
+            <TextInput
+              style={[s.input, focused === "email" && s.inputFocused]}
+              value={email}
+              onChangeText={setEmail}
+              onFocus={() => setFocused("email")}
+              onBlur={() => setFocused(null)}
+              placeholder="Enter your email address"
+              placeholderTextColor="#94A3B8"
+              autoCapitalize="none"
+              autoComplete="email"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              editable={!busy}
+              returnKeyType="next"
+            />
+
+            <Text style={[s.label, s.labelSpaced]}>
+              Password <Text style={s.required}>*</Text>
+            </Text>
+            <View
+              style={[s.passwordRow, focused === "password" && s.inputFocused]}
+            >
+              <TextInput
+                style={s.passwordInput}
+                value={password}
+                onChangeText={setPassword}
+                onFocus={() => setFocused("password")}
+                onBlur={() => setFocused(null)}
+                placeholder="Enter your password"
+                placeholderTextColor="#94A3B8"
+                autoCapitalize="none"
+                autoComplete="current-password"
+                secureTextEntry={!showPassword}
+                textContentType="password"
+                editable={!busy}
+                onSubmitEditing={submit}
+                returnKeyType="go"
+              />
+              <Pressable
+                onPress={() => setShowPassword((v) => !v)}
+                style={s.eyeButton}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  showPassword ? "Hide password" : "Show password"
+                }
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#94A3B8"
+                />
               </Pressable>
             </View>
+
             {error ? <ErrorBanner message={error} /> : null}
-            <PrimaryButton title="Sign in" busy={busy} onPress={() => void onSignIn(email, password)} />
-            <Text style={styles.facultyOnly}>Faculty profile required · No sign-up from this app</Text>
+
+            <Pressable
+              onPress={submit}
+              disabled={busy}
+              accessibilityRole="button"
+              style={({ pressed }) => [
+                s.button,
+                pressed && s.buttonPressed,
+                busy && s.buttonDisabled,
+              ]}
+            >
+              <Ionicons name="log-in-outline" size={20} color="#FFFFFF" />
+              <Text style={s.buttonText}>
+                {busy ? "Signing in…" : "Sign In"}
+              </Text>
+            </Pressable>
+
+            <Text style={s.note}>
+              Don't have an account?{" "}
+              <Text
+                style={s.signup}
+                onPress={openSignup}
+                accessibilityRole="link"
+                accessibilityLabel="Sign up on the SKEDYUL website"
+              >
+                Click here
+              </Text>{" "}
+              to register right now!
+            </Text>
+
+            <Text style={s.developedBy}>
+              Developed by
+            </Text>
+            <Text style={s.developerName}>
+              GROUP FLUXWAVE
+            </Text>
           </View>
-          <Text style={styles.footerText}>Skedyul · Faculty schedule access</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  )
+  );
 }

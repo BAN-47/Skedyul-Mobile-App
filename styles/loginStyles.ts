@@ -1,0 +1,44 @@
+import { StyleSheet } from 'react-native'
+
+export const loginStyles = StyleSheet.create({
+  flex: { flex: 1 },
+  safe: { flex: 1, backgroundColor: '#1E3A8A' },
+  scroll: { flex: 1, backgroundColor: '#F8FAFC' },
+  scrollContent: { flexGrow: 1 },
+
+  hero: { backgroundColor: '#1E3A8A', alignItems: 'center', paddingTop: 34, paddingBottom: 54, paddingHorizontal: 24, overflow: 'hidden' },
+  circle: { position: 'absolute', borderRadius: 999, borderWidth: 1, borderColor: '#FFFFFF12', backgroundColor: '#FFFFFF0A' },
+  circleTop: { width: 190, height: 190, top: -70, right: -50 },
+  circleBottom: { width: 110, height: 110, bottom: 20, left: -30 },
+  logo: { color: '#FFFFFF', fontSize: 42, fontWeight: '700', letterSpacing: -1, textAlign: 'center'},
+  logoAccent: { color: '#60A5FA', },
+  tagline: { color: '#FFFFFF66', fontSize: 10, fontWeight: '700', letterSpacing: 2.2, marginTop: 6 },
+  badge: { marginTop: 22, width: '100%', borderRadius: 16, borderWidth: 1, borderColor: '#FFFFFF1A', backgroundColor: '#FFFFFF0F', paddingHorizontal: 14, paddingVertical: 11, alignItems: 'center' },
+  badgeTitle: { color: '#FFFFFF', fontSize: 11, fontWeight: '800', textAlign: 'center', lineHeight: 15 },
+  badgeSub: { color: '#FFFFFF55', fontSize: 10, marginTop: 4, textAlign: 'center' },
+
+  form: { flex: 1, backgroundColor: '#F8FAFC', borderTopLeftRadius: 25, borderTopRightRadius: 25, marginTop: -20, paddingHorizontal: 24, paddingTop: 28, paddingBottom: 32, },
+  loginTitle: { color: '#9CA3AF', fontSize: 50, fontWeight: '700', letterSpacing: -1, textAlign: 'center' },
+  loginTitleAccent: { color: '#60A5FA' },
+    subtitle: { color: '#64748B', fontSize: 14, marginTop: 6, marginBottom: 26, textAlign: 'center' },
+
+  label: { color: '#64748B', fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 },
+  labelSpaced: { marginTop: 18 },
+  required: { color: '#EF4444' },
+  input: { height: 50, borderRadius: 10, borderWidth: 1, borderColor: '#E2E8F0', backgroundColor: '#FFFFFF', paddingHorizontal: 14, color: '#0F172A', fontSize: 14 },
+  inputFocused: { borderColor: '#2563EB', shadowColor: '#2563EB', shadowOpacity: 0.12, shadowRadius: 4, shadowOffset: { width: 0, height: 0 }, elevation: 1 },
+  passwordRow: { height: 50, flexDirection: 'row', alignItems: 'center', borderRadius: 10, borderWidth: 1, borderColor: '#E2E8F0', backgroundColor: '#FFFFFF' },
+  passwordInput: { flex: 1, minWidth: 0, height: 48, paddingHorizontal: 14, color: '#0F172A', fontSize: 14 },
+  eyeButton: { width: 46, height: 48, alignItems: 'center', justifyContent: 'center' },
+
+  button: { height: 52, borderRadius: 10, backgroundColor: '#2563EB', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 28, shadowColor: '#2563EB', shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 3 },
+  buttonPressed: { backgroundColor: '#1D4ED8' },
+  buttonDisabled: { opacity: 0.65 },
+  buttonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+    note: { color: '#94A3B8', fontSize: 11, textAlign: 'center', marginTop: 18 },
+  developedBy: { color: '#94A3B8', fontSize: 10, fontFamily: 'Inter_700Bold', fontWeight: '700', letterSpacing: 1.6, textAlign: 'center', textTransform: 'uppercase', marginTop: 28, },
+developerName: { color: '#2563EB', fontSize: 17, fontFamily: 'Inter_700Bold', fontWeight: '700', letterSpacing: 2.2, textAlign: 'center', lineHeight: 24, marginTop: 4, },
+
+    noteLink: { color: '#2563EB', fontWeight: '700' },
+signup: { color: '#2563EB', fontWeight: '700' },
+})
