@@ -63,6 +63,12 @@ export type FacultyProfile = {
   phone_number?: string | null
   address?: string | null
   bio?: string | null
+  bachelors_degree?: string | null
+  masters_degree?: string | null
+  doctorate_degree?: string | null
+  bachelors_abbr?: string | null
+  masters_abbr?: string | null
+  doctorate_abbr?: string | null
   email?: string | null
   profile_image?: string | null
   program: string | null
