@@ -170,12 +170,7 @@ export function FacultyMobileLogin({
               to register right now!
             </Text>
 
-            <Text style={s.developedBy}>
-              Developed by
-            </Text>
-            <Text style={s.developerName}>
-              GROUP FLUXWAVE
-            </Text>
+            <Text style={s.developedBy}>2026™ SKEDYUL Team</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
