@@ -24,13 +24,18 @@
     "plugins": [
       [
         "expo-local-authentication",
-        { "faceIDPermission": "Allow SKEDYUL to use Face ID for sign-in." }
+        {
+          "faceIDPermission": "Allow SKEDYUL to use Face ID for sign-in."
+        }
       ],
       [
         "expo-secure-store",
-        { "faceIDPermission": "Allow SKEDYUL to protect your saved sign-in." }
+        {
+          "faceIDPermission": "Allow SKEDYUL to protect your saved sign-in."
+        }
       ],
-      "expo-router"
+      "expo-router",
+      "expo-font"
     ]
   }
 }

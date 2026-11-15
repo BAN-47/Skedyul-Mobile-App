@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Image, Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native'
+import { Image, Platform, Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { facultyImageUrl, type FacultyDashboard } from '../lib/api'
 import { getInitials } from '../utils/formatters'
@@ -257,7 +257,8 @@ function ChoiceField({ label, value, options, displayValue, displayOptions, onCh
 }
 
 function NotificationToggle({ title, description, value, onChange, disabled = false }: { title: string; description: string; value: boolean; onChange: (value: boolean) => void; disabled?: boolean }) {
-  return <View style={styles.notificationSetting}><View style={{ flex: 1, paddingRight: 10 }}><Text style={styles.notificationSettingTitle}>{title}</Text><Text style={styles.notificationSettingDescription}>{description}</Text></View><Switch disabled={disabled} value={value} onValueChange={onChange} trackColor={{ false: '#CBD5E1', true: COLORS.blue }} thumbColor={COLORS.white} /></View>
+  const webActiveThumbColor = Platform.OS === 'web' ? { activeThumbColor: COLORS.white } : {}
+  return <View style={styles.notificationSetting}><View style={{ flex: 1, paddingRight: 10 }}><Text style={styles.notificationSettingTitle}>{title}</Text><Text style={styles.notificationSettingDescription}>{description}</Text></View><Switch {...webActiveThumbColor} disabled={disabled} value={value} onValueChange={onChange} trackColor={{ false: '#CBD5E1', true: COLORS.blue }} thumbColor={COLORS.white} /></View>
 }
 
 function SaveButton({ title, busy, onPress }: { title: string; busy: boolean; onPress: () => void }) {

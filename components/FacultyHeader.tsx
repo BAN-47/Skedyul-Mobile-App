@@ -15,21 +15,54 @@ export function FacultyHeader({ dashboard, onOpenProfile }: { dashboard: Faculty
 
   return (
     <View style={styles.homeHeader}>
-      <Text style={styles.homeDate}>{dateLabel}</Text>
+      <View style={styles.headerTop}>
+        <Text style={styles.headerLogo} numberOfLines={1}>
+          SKED<Text style={styles.logoAccentLoading}>YUL</Text>
+        </Text>
+        <Text style={styles.homeDate} numberOfLines={1}>
+          {dateLabel}
+        </Text>
+      </View>
       <View style={styles.greetingRow}>
         <View style={styles.greetingCopy}>
-          <Text style={styles.homeGreeting}>Good {greeting}, {dashboard.faculty.first_name || dashboard.faculty.name.split(' ')[0]}</Text>
-          <Text style={styles.homeSubtitle}>{dashboard.faculty.program || 'Faculty'} · {dashboard.semester?.name || 'Current semester'} {dashboard.semester?.academic_year || ''}</Text>
+          <Text style={styles.homeGreeting}>
+            Good {greeting},{" "}
+            {dashboard.faculty.first_name ||
+              dashboard.faculty.name.split(" ")[0]}
+          </Text>
+          <Text style={styles.homeSubtitle}>
+            {dashboard.faculty.program || "Faculty"} ·{" "}
+            {dashboard.semester?.name || "Current semester"}{" "}
+            {dashboard.semester?.academic_year || ""}
+          </Text>
         </View>
-        <Pressable onPress={onOpenProfile} style={styles.headerAvatar} accessibilityLabel="Open profile menu">
-          {facultyImageUrl(dashboard.faculty.profile_image) ? <Image source={{ uri: facultyImageUrl(dashboard.faculty.profile_image)! }} style={styles.headerAvatarImage} /> : <Text style={styles.headerAvatarText}>{getInitials(dashboard.faculty.name)}</Text>}
+        <Pressable
+          onPress={onOpenProfile}
+          style={styles.headerAvatar}
+          accessibilityLabel="Open profile menu"
+        >
+          {facultyImageUrl(dashboard.faculty.profile_image) ? (
+            <Image
+              source={{
+                uri: facultyImageUrl(dashboard.faculty.profile_image)!,
+              }}
+              style={styles.headerAvatarImage}
+            />
+          ) : (
+            <Text style={styles.headerAvatarText}>
+              {getInitials(dashboard.faculty.name)}
+            </Text>
+          )}
         </Pressable>
       </View>
       <View style={styles.headerStats}>
-        <HeaderStat label="Teaching Load" value={`${dashboard.load.hours} hrs`} />
+        <HeaderStat
+          label="Teaching Load"
+          value={`${dashboard.load.hours} hrs`}
+        />
         <HeaderStat label="Subjects" value={String(dashboard.subject_count)} />
         <HeaderStat label="Sections" value={String(sectionCount)} />
       </View>
     </View>
-  )
+  );
 }
