@@ -36,7 +36,7 @@ export const loginStyles = StyleSheet.create({
   buttonDisabled: { opacity: 0.65 },
   buttonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
     note: { color: '#94A3B8', fontSize: 11, textAlign: 'center', marginTop: 18 },
-  developedBy: { color: '#94A3B8', fontSize: 10, fontFamily: 'Inter_700Bold', fontWeight: '700', letterSpacing: 1.6, textAlign: 'center', textTransform: 'uppercase', marginTop: 28, },
+  developedBy: { color: '#94A3B8', fontSize: 10, fontFamily: 'Inter_700Bold', fontWeight: '700', letterSpacing: 1.6, textAlign: 'center', textTransform: 'uppercase', marginTop: 30, },
 developerName: { color: '#2563EB', fontSize: 17, fontFamily: 'Inter_700Bold', fontWeight: '700', letterSpacing: 2.2, textAlign: 'center', lineHeight: 24, marginTop: 4, },
 
     noteLink: { color: '#2563EB', fontWeight: '700' },
