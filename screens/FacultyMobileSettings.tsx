@@ -36,6 +36,12 @@ export function FacultyMobileSettings({ dashboard, onClose, onSaveProfile, onCha
   const [civilStatus, setCivilStatus] = useState(profile.civil_status || '')
   const [dateOfBirth, setDateOfBirth] = useState(profile.date_of_birth || '')
   const [nationality, setNationality] = useState(profile.nationality || '')
+  const [bachelorsDegree, setBachelorsDegree] = useState(profile.bachelors_degree || '')
+  const [bachelorsAbbr, setBachelorsAbbr] = useState(profile.bachelors_abbr || '')
+  const [mastersDegree, setMastersDegree] = useState(profile.masters_degree || '')
+  const [mastersAbbr, setMastersAbbr] = useState(profile.masters_abbr || '')
+  const [doctorateDegree, setDoctorateDegree] = useState(profile.doctorate_degree || '')
+  const [doctorateAbbr, setDoctorateAbbr] = useState(profile.doctorate_abbr || '')
   const [email, setEmail] = useState(profile.email || '')
   const [phone, setPhone] = useState(profile.phone_number || '')
   const [office, setOffice] = useState(profile.address || '')
@@ -65,6 +71,12 @@ export function FacultyMobileSettings({ dashboard, onClose, onSaveProfile, onCha
     setCivilStatus(profile.civil_status || '')
     setDateOfBirth(profile.date_of_birth || '')
     setNationality(profile.nationality || '')
+    setBachelorsDegree(profile.bachelors_degree || '')
+    setBachelorsAbbr(profile.bachelors_abbr || '')
+    setMastersDegree(profile.masters_degree || '')
+    setMastersAbbr(profile.masters_abbr || '')
+    setDoctorateDegree(profile.doctorate_degree || '')
+    setDoctorateAbbr(profile.doctorate_abbr || '')
     setEmail(profile.email || '')
     setPhone(profile.phone_number || '')
     setOffice(profile.address || '')
@@ -118,10 +130,16 @@ export function FacultyMobileSettings({ dashboard, onClose, onSaveProfile, onCha
   }
 
   function saveProfile() {
+    if (bachelorsDegree.trim() && !bachelorsAbbr.trim()) { setMessage("Enter the bachelor's degree acronym too."); return }
+    if (mastersDegree.trim() && !mastersAbbr.trim()) { setMessage("Enter the master's degree acronym too."); return }
+    if (doctorateDegree.trim() && !doctorateAbbr.trim()) { setMessage('Enter the doctorate degree acronym too.'); return }
     const personal = {
       fac_first_name: firstName.trim(), fac_last_name: lastName.trim(), fac_middle_name: middleName.trim(),
       fac_suffix: suffix.trim(), fac_employee_id: employeeId.trim(), fac_gender: gender || null,
       fac_civil_status: civilStatus || null, fac_dob: dateOfBirth || null, fac_nationality: nationality.trim(),
+      fac_bachelors_degree: bachelorsDegree.trim() || null, fac_bachelors_abbr: bachelorsAbbr.trim() || null,
+      fac_masters_degree: mastersDegree.trim() || null, fac_masters_abbr: mastersAbbr.trim() || null,
+      fac_doctorate_degree: doctorateDegree.trim() || null, fac_doctorate_abbr: doctorateAbbr.trim() || null,
     }
     const contact = { usr_email: email.trim(), fac_phone_number: phone.trim(), fac_address: office.trim(), fac_bio: bio.trim() }
     return save(() => onSaveProfile(personal, contact), 'Your profile details were saved.')
@@ -180,6 +198,17 @@ export function FacultyMobileSettings({ dashboard, onClose, onSaveProfile, onCha
             <FormField label="Department" value={profile.program || profile.college || 'Not assigned'} editable={false} />
             <FormField label="Bio / About" value={bio} onChangeText={setBio} multiline />
             <SaveButton title="Save Changes" busy={saving} onPress={saveProfile} />
+          </View>
+          <View style={styles.settingsCard}>
+            <Text style={styles.settingsCardTitle}>Education & Degrees</Text>
+            <Text style={styles.settingsCardSubtitle}>Enter each full degree name and its acronym, as on the web profile.</Text>
+            <FormField label="Bachelor’s Degree" value={bachelorsDegree} onChangeText={setBachelorsDegree} placeholder="Bachelor of Science in Information Systems" />
+            <FormField label="Bachelor’s Acronym" value={bachelorsAbbr} onChangeText={setBachelorsAbbr} placeholder="BSIS" />
+            <FormField label="Master’s Degree" value={mastersDegree} onChangeText={setMastersDegree} placeholder="Master of Information Technology" />
+            <FormField label="Master’s Acronym" value={mastersAbbr} onChangeText={setMastersAbbr} placeholder="MIT" />
+            <FormField label="Doctorate Degree" value={doctorateDegree} onChangeText={setDoctorateDegree} placeholder="Doctor of Information Technology" />
+            <FormField label="Doctorate Acronym" value={doctorateAbbr} onChangeText={setDoctorateAbbr} placeholder="DIT, PhD" />
+            <SaveButton title="Save Degree Details" busy={saving} onPress={saveProfile} />
           </View>
         </> : null}
 

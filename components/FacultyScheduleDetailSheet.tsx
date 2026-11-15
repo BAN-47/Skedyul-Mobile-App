@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import type { FacultyProfile, FacultySchedule } from '../lib/api'
 import { styles } from '../styles/facultyStyles'
-import { formatTime } from '../utils/formatters'
+import { formatFacultyName, formatTime } from '../utils/formatters'
 
 export function FacultyScheduleDetailSheet({ item, schedules, faculty, onClose }: {
   item: FacultySchedule
@@ -42,7 +42,7 @@ export function FacultyScheduleDetailSheet({ item, schedules, faculty, onClose }
         <DetailTile label="SCHEDULE" value={scheduleText} wide />
         <View style={styles.scheduleDetailFaculty}>
           <Text style={styles.detailTileLabel}>FACULTY</Text>
-          <Text style={styles.detailTileValue}>{faculty.name}</Text>
+          <Text style={styles.detailTileValue}>{formatFacultyName(faculty)}</Text>
           <Text style={styles.scheduleDetailDepartment}>Faculty · {faculty.program || faculty.college || 'Department'}</Text>
         </View>
       </ScrollView>

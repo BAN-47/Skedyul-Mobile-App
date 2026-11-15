@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 import type { FacultyDashboard, FacultySchedule } from '../lib/api'
 import { FacultyScheduleDetailSheet } from '../components/FacultyScheduleDetailSheet'
 import { styles } from '../styles/facultyStyles'
-import { formatTime } from '../utils/formatters'
+import { formatFacultyName, formatTime } from '../utils/formatters'
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const DAY_COLORS = [
@@ -32,7 +32,7 @@ export function FacultyMobileSchedule({ dashboard, onShowSummary }: { dashboard:
     {selectedClass ? <FacultyScheduleDetailSheet item={selectedClass} schedules={dashboard.schedules} faculty={dashboard.faculty} onClose={() => setSelectedClass(null)} /> : null}
     <View style={styles.welcomeCard}>
       <Text style={styles.welcomeOverline}>WELCOME BACK</Text>
-      <Text style={styles.welcomeName}>{dashboard.faculty.name}</Text>
+      <Text style={styles.welcomeName}>{formatFacultyName(dashboard.faculty)}</Text>
       <Text style={styles.welcomeMeta}>Faculty · {dashboard.faculty.program || dashboard.faculty.college || 'Department'} · {dashboard.semester?.name || 'Active semester'} {dashboard.semester?.academic_year || ''}</Text>
       <Text style={styles.scheduleWelcomeNote}>Your faculty schedule and room assignments</Text>
     </View>
