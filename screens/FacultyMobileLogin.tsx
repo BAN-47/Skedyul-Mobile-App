@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -8,37 +8,49 @@ import {
   ScrollView,
   Text,
   TextInput,
+  type TextInputInstance,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { ErrorBanner } from "../components/ErrorBanner";
-import { loginStyles as s } from "../styles/loginStyles.ts";
+import { loginStyles as s } from "../styles/loginStyles";
+import { facultySignupUrl } from "../lib/api";
 
 export function FacultyMobileLogin({
   busy,
   error,
+  biometricEnabled,
   onSignIn,
+  onBiometricSignIn,
 }: {
   busy: boolean;
   error: string;
+  biometricEnabled: boolean;
   onSignIn: (email: string, password: string) => Promise<void>;
+  onBiometricSignIn: () => Promise<void>;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState<"email" | "password" | null>(null);
+  const emailInput = useRef<TextInputInstance>(null);
+  const passwordInput = useRef<TextInputInstance>(null);
 
   const submit = () => void onSignIn(email, password);
   const openSignup = async () => {
     try {
-      await Linking.openURL("http://localhost/Skedyul/public/register");
+      const signupUrl = facultySignupUrl();
+      if (!signupUrl) {
+        throw new Error("Set EXPO_PUBLIC_SIGNUP_URL or EXPO_PUBLIC_API_URL to your Skedyul server address.");
+      }
+      await Linking.openURL(signupUrl);
     } catch (error) {
       console.error("Could not open the SKEDYUL registration page.", error);
       Alert.alert(
         "Unable to open sign up",
-        "Make sure the SKEDYUL website is running in XAMPP, then try again.",
+        error instanceof Error ? error.message : "Check your Skedyul server address and try again.",
       );
     }
   };
@@ -86,6 +98,7 @@ export function FacultyMobileLogin({
               Email Address <Text style={s.required}>*</Text>
             </Text>
             <TextInput
+              ref={emailInput}
               style={[s.input, focused === "email" && s.inputFocused]}
               value={email}
               onChangeText={setEmail}
@@ -97,18 +110,24 @@ export function FacultyMobileLogin({
               autoComplete="email"
               keyboardType="email-address"
               textContentType="emailAddress"
+              autoCorrect={false}
+              cursorColor="#2563EB"
               editable={!busy}
+              onSubmitEditing={() => passwordInput.current?.focus()}
+              blurOnSubmit={false}
               returnKeyType="next"
             />
 
             <Text style={[s.label, s.labelSpaced]}>
               Password <Text style={s.required}>*</Text>
             </Text>
-            <View
-              style={[s.passwordRow, focused === "password" && s.inputFocused]}
-            >
+            <View style={s.passwordRow}>
               <TextInput
-                style={s.passwordInput}
+                ref={passwordInput}
+                style={[
+                  s.passwordInput,
+                  focused === "password" && s.passwordInputFocused,
+                ]}
                 value={password}
                 onChangeText={setPassword}
                 onFocus={() => setFocused("password")}
@@ -119,6 +138,8 @@ export function FacultyMobileLogin({
                 autoComplete="current-password"
                 secureTextEntry={!showPassword}
                 textContentType="password"
+                autoCorrect={false}
+                cursorColor="#2563EB"
                 editable={!busy}
                 onSubmitEditing={submit}
                 returnKeyType="go"
@@ -156,6 +177,22 @@ export function FacultyMobileLogin({
                 {busy ? "Signing in…" : "Sign In"}
               </Text>
             </Pressable>
+
+            {biometricEnabled ? (
+              <Pressable
+                onPress={() => void onBiometricSignIn()}
+                disabled={busy}
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  s.biometricButton,
+                  pressed && !busy && s.buttonPressed,
+                  busy && s.buttonDisabled,
+                ]}
+              >
+                <Ionicons name="finger-print-outline" size={20} color="#2563EB" />
+                <Text style={s.biometricButtonText}>Sign in with biometrics</Text>
+              </Pressable>
+            ) : null}
 
             <Text style={s.note}>
               Don't have an account?{" "}

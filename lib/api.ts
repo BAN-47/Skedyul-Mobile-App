@@ -21,16 +21,39 @@ const storage = {
 /** Use an explicit server URL for deployed builds, or the Expo host on local development. */
 function apiBaseUrl() {
   const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, '')
-  if (configuredUrl) return configuredUrl
+  if (configuredUrl) {
+    if (!__DEV__) {
+      let parsedUrl: URL
+      try {
+        parsedUrl = new URL(configuredUrl)
+      } catch {
+        throw new Error('Set EXPO_PUBLIC_API_URL to your deployed Skedyul API URL.')
+      }
+      if (parsedUrl.protocol !== 'https:') {
+        throw new Error('The deployed Skedyul API must use HTTPS. Set EXPO_PUBLIC_API_URL to its HTTPS address.')
+      }
+    }
+    return configuredUrl
+  }
 
-  const expoHost = Constants.expoConfig?.hostUri?.split(':')[0]
-  if (expoHost) return `http://${expoHost}:8000`
+  if (__DEV__) {
+    const expoHost = Constants.expoConfig?.hostUri?.split(':')[0]
+    if (expoHost) return `http://${expoHost}:8000`
+  }
 
   if (typeof window !== 'undefined' && window.location.hostname) {
-    return `http://${window.location.hostname}:8000`
+    return __DEV__ ? `http://${window.location.hostname}:8000` : window.location.origin
   }
 
   return null
+}
+
+export function facultySignupUrl() {
+  const configuredUrl = process.env.EXPO_PUBLIC_SIGNUP_URL?.trim()
+  if (configuredUrl) return configuredUrl
+  const baseUrl = apiBaseUrl()
+  if (!baseUrl) return null
+  return new URL('register', `${baseUrl.replace(/\/+$/, '')}/`).toString()
 }
 
 export type FacultySchedule = {
@@ -114,7 +137,9 @@ export class ApiError extends Error {
 function apiUrl(path: string) {
   const baseUrl = apiBaseUrl()
   if (!baseUrl) {
-    throw new Error('Could not find the Skedyul server address. Start Expo on the same Wi-Fi as Laravel, or set EXPO_PUBLIC_API_URL for a deployed server.')
+    throw new Error(__DEV__
+      ? 'Could not find the Skedyul server address. Start Expo on the same Wi-Fi as Laravel, or set EXPO_PUBLIC_API_URL.'
+      : 'The Skedyul server address is not configured. Set EXPO_PUBLIC_API_URL to your deployed HTTPS server address.')
   }
   return `${baseUrl}/api${path}`
 }

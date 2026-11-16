@@ -8,9 +8,13 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
+      "bundleIdentifier": "com.skedyul.faculty",
+      "buildNumber": "1",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.skedyul.faculty",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
