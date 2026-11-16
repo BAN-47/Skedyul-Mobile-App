@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { ComponentRef } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -14,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { ErrorBanner } from "../components/ErrorBanner";
-import { loginStyles as s } from "../styles/loginStyles.ts";
+import { loginStyles as s } from "../styles/loginStyles";
 
 export function FacultyMobileLogin({
   busy,
@@ -29,8 +30,10 @@ export function FacultyMobileLogin({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState<"email" | "password" | null>(null);
+  const passwordInput = useRef<ComponentRef<typeof TextInput>>(null);
 
   const submit = () => void onSignIn(email, password);
+
   const openSignup = async () => {
     try {
       await Linking.openURL("http://localhost/Skedyul/public/register");
@@ -90,41 +93,52 @@ export function FacultyMobileLogin({
               value={email}
               onChangeText={setEmail}
               onFocus={() => setFocused("email")}
-              onBlur={() => setFocused(null)}
+              onBlur={() =>
+                setFocused((current) => (current === "email" ? null : current))
+              }
               placeholder="Enter your email address"
               placeholderTextColor="#94A3B8"
               autoCapitalize="none"
-              autoComplete="email"
+              autoComplete="off"
+              importantForAutofill="no"
               keyboardType="email-address"
-              textContentType="emailAddress"
               editable={!busy}
               returnKeyType="next"
+              onSubmitEditing={() => passwordInput.current?.focus()}
             />
 
             <Text style={[s.label, s.labelSpaced]}>
               Password <Text style={s.required}>*</Text>
             </Text>
             <View
-              style={[s.passwordRow, focused === "password" && s.inputFocused]}
+              style={[
+                s.passwordRow,
+                focused === "password" && s.inputFocused,
+              ]}
             >
               <TextInput
+                ref={passwordInput}
                 style={s.passwordInput}
                 value={password}
                 onChangeText={setPassword}
                 onFocus={() => setFocused("password")}
-                onBlur={() => setFocused(null)}
+                onBlur={() =>
+                  setFocused((current) =>
+                    current === "password" ? null : current,
+                  )
+                }
                 placeholder="Enter your password"
                 placeholderTextColor="#94A3B8"
                 autoCapitalize="none"
-                autoComplete="current-password"
+                autoComplete="off"
+                importantForAutofill="no"
                 secureTextEntry={!showPassword}
-                textContentType="password"
                 editable={!busy}
                 onSubmitEditing={submit}
                 returnKeyType="go"
               />
               <Pressable
-                onPress={() => setShowPassword((v) => !v)}
+                onPress={() => setShowPassword((visible) => !visible)}
                 style={s.eyeButton}
                 accessibilityRole="button"
                 accessibilityLabel={
