@@ -73,5 +73,11 @@ export default function SkedyulFacultyApp() {
     )
   }
 
-  return <FacultyMobileLogin busy={session.busy} error={session.error} biometricEnabled={session.biometricEnabled} onSignIn={session.signIn} onBiometricSignIn={session.signInWithBiometrics} />
+  return (
+    <FacultyMobileLogin
+      busy={session.busy}
+      error={session.error}
+      onSignIn={session.signIn}
+    />
+  )
 }

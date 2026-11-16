@@ -21,15 +21,15 @@ import { facultySignupUrl } from "../lib/api";
 export function FacultyMobileLogin({
   busy,
   error,
-  biometricEnabled,
+  biometricEnabled = false,
   onSignIn,
   onBiometricSignIn,
 }: {
   busy: boolean;
   error: string;
-  biometricEnabled: boolean;
+  biometricEnabled?: boolean;
   onSignIn: (email: string, password: string) => Promise<void>;
-  onBiometricSignIn: () => Promise<void>;
+  onBiometricSignIn?: () => Promise<void>;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,6 +39,7 @@ export function FacultyMobileLogin({
   const passwordInput = useRef<TextInputInstance>(null);
 
   const submit = () => void onSignIn(email, password);
+
   const openSignup = async () => {
     try {
       const signupUrl = facultySignupUrl();
@@ -103,15 +104,15 @@ export function FacultyMobileLogin({
               value={email}
               onChangeText={setEmail}
               onFocus={() => setFocused("email")}
-              onBlur={() => setFocused(null)}
+              onBlur={() =>
+                setFocused((current) => (current === "email" ? null : current))
+              }
               placeholder="Enter your email address"
               placeholderTextColor="#94A3B8"
               autoCapitalize="none"
-              autoComplete="email"
+              autoComplete="off"
+              importantForAutofill="no"
               keyboardType="email-address"
-              textContentType="emailAddress"
-              autoCorrect={false}
-              cursorColor="#2563EB"
               editable={!busy}
               onSubmitEditing={() => passwordInput.current?.focus()}
               blurOnSubmit={false}
@@ -131,21 +132,23 @@ export function FacultyMobileLogin({
                 value={password}
                 onChangeText={setPassword}
                 onFocus={() => setFocused("password")}
-                onBlur={() => setFocused(null)}
+                onBlur={() =>
+                  setFocused((current) =>
+                    current === "password" ? null : current,
+                  )
+                }
                 placeholder="Enter your password"
                 placeholderTextColor="#94A3B8"
                 autoCapitalize="none"
-                autoComplete="current-password"
+                autoComplete="off"
+                importantForAutofill="no"
                 secureTextEntry={!showPassword}
-                textContentType="password"
-                autoCorrect={false}
-                cursorColor="#2563EB"
                 editable={!busy}
                 onSubmitEditing={submit}
                 returnKeyType="go"
               />
               <Pressable
-                onPress={() => setShowPassword((v) => !v)}
+                onPress={() => setShowPassword((visible) => !visible)}
                 style={s.eyeButton}
                 accessibilityRole="button"
                 accessibilityLabel={
@@ -178,7 +181,7 @@ export function FacultyMobileLogin({
               </Text>
             </Pressable>
 
-            {biometricEnabled ? (
+            {biometricEnabled && onBiometricSignIn ? (
               <Pressable
                 onPress={() => void onBiometricSignIn()}
                 disabled={busy}
