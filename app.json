@@ -7,6 +7,11 @@
     "orientation": "portrait",
     "icon": "./assets/skedyul-icon-foreground.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/skedyul-splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#E6F4FE"
+    },
     "ios": {
       "bundleIdentifier": "com.skedyul.faculty",
       "buildNumber": "1",
@@ -18,7 +23,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#19316D",
         "foregroundImage": "./assets/skedyul-icon-foreground.png",
-        "backgroundImage": "./assets/skedyul-icon-background.svg",
+        "backgroundImage": "./assets/skedyul-icon-background.png",
         "monochromeImage": "./assets/skedyul-icon-monochrome.png"
       },
       "permissions": [
