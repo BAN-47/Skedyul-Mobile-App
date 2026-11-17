@@ -5,7 +5,7 @@
     "slug": "Skedyul-Mobile-App",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/skedyul-icon-foreground.png",
     "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.skedyul.faculty",
@@ -17,13 +17,12 @@
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/skedyul-icon-foreground.png",
+        "monochromeImage": "./assets/skedyul-icon-monochrome.png"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/skedyul-favicon.png"
     },
     "plugins": [
       [
