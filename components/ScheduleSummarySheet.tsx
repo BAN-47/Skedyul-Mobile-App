@@ -5,6 +5,14 @@ import { styles } from '../styles/facultyStyles'
 /** Opens the summary of courses and teaching-load figures from the faculty PBT. */
 export function ScheduleSummarySheet({ dashboard, onClose }: { dashboard: FacultyDashboard; onClose: () => void }) {
   const courses = getCourseRows(dashboard.schedules)
+  const shifts = dashboard.load.shift_breakdown
+  const day = shifts?.day
+  const evening = shifts?.evening
+  const totalPreparations = shifts?.total_preparations ?? null
+  const totalUnits = day && evening
+    ? formatNumber(day.units + evening.units)
+    : String(dashboard.load.units ?? sumUnits(courses))
+  const totalHours = day && evening ? day.hours_per_week + evening.hours_per_week : dashboard.load.hours_per_week ?? dashboard.load.hours
   return (
     <View style={styles.modalShade}>
       <Pressable style={styles.modalBackdrop} onPress={onClose} />
@@ -21,12 +29,26 @@ export function ScheduleSummarySheet({ dashboard, onClose }: { dashboard: Facult
             <Text style={[styles.summaryCourseSection, { flex: 0.65, textAlign: 'right' }]}>{course.student_count ?? '—'}</Text>
           </View>) : <Text style={styles.summaryEmpty}>No courses assigned this semester.</Text>}
           <View style={styles.summaryLoadBox}>
-            <SummaryLine label="No. of Preparations" value={String(dashboard.load.preparations ?? dashboard.subject_count)} />
-            <SummaryLine label="No. of Units" value={String(dashboard.load.units ?? sumUnits(courses))} />
-            <SummaryLine label="No. of Hours / Week" value={`${dashboard.load.hours_per_week ?? dashboard.load.hours}h`} />
-            <SummaryLine label="Teaching Load Limit" value={`${dashboard.load.max_hours}h`} />
-            <SummaryLine label="Administrative Designation" value={dashboard.load.designation || '—'} />
+            <SummaryHeading title="No. of Preparations" />
+            <SummaryLine label="Total (excluding REC)" value={totalPreparations === null ? '—' : String(totalPreparations)} />
+            <SummaryLine label="Evening" value={evening ? String(evening.preparations) : '—'} />
+            <SummaryLine label="Day" value={day ? String(day.preparations) : '—'} />
             <View style={styles.summaryLoadDivider} />
+            <SummaryHeading title="No. of Units" />
+            <SummaryLine label="Day" value={day ? formatNumber(day.units) : '—'} />
+            <SummaryLine label="Evening" value={evening ? formatNumber(evening.units) : '—'} />
+            <SummaryLine label="Total" value={totalUnits} />
+            <View style={styles.summaryLoadDivider} />
+            <SummaryHeading title="No. of Hours / Week" />
+            <SummaryLine label="Day" value={day ? `${formatNumber(day.hours_per_week)}h` : '—'} />
+            <SummaryLine label="Evening" value={evening ? `${formatNumber(evening.hours_per_week)}h` : '—'} />
+            <SummaryLine label="Total" value={`${formatNumber(totalHours)}h`} />
+            <View style={styles.summaryLoadDivider} />
+            <SummaryHeading title="Teaching Load Limit" />
+            <SummaryLine label="Day" value={day ? `${formatNumber(day.max_hours)}h` : '—'} />
+            <SummaryLine label="Evening" value={evening ? `${formatNumber(evening.max_hours)}h` : '—'} />
+            <View style={styles.summaryLoadDivider} />
+            <SummaryLine label="Administrative Designation" value={dashboard.load.designation || '—'} />
             <SummaryLine label="Production" value={dashboard.load.production || '—'} />
             <SummaryLine label="Extension" value={dashboard.load.extension || '—'} />
             <SummaryLine label="Research" value={dashboard.load.research || '—'} />
@@ -51,4 +73,12 @@ function sumUnits(courses: FacultySchedule[]) {
 
 function SummaryLine({ label, value }: { label: string; value: string }) {
   return <View style={styles.summaryLine}><Text style={styles.summaryLineLabel}>{label}</Text><Text style={styles.summaryLineValue}>{value}</Text></View>
+}
+
+function SummaryHeading({ title }: { title: string }) {
+  return <Text style={styles.summaryGroupHeading}>{title}</Text>
+}
+
+function formatNumber(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1)
 }

@@ -21,6 +21,13 @@ export function FacultyMobileSchedule({ dashboard, onShowSummary }: { dashboard:
   const daySchedules = useMemo(() => dashboard.schedules
     .filter(item => item.day.toLowerCase() === selectedDay.toLowerCase())
     .sort((a, b) => timeToMinutes(a.start_time) - timeToMinutes(b.start_time)), [dashboard.schedules, selectedDay])
+  const dayStats = useMemo(() => ({
+    subjects: new Set(daySchedules.map(item => item.course_code || item.course_name).filter(Boolean)).size,
+    hours: daySchedules.reduce((total, item) => total + Math.max(0, timeToMinutes(item.end_time) - timeToMinutes(item.start_time)) / 60, 0),
+    sections: new Set(daySchedules
+      .map(item => item.section_id || item.section?.trim())
+      .filter((section): section is string => Boolean(section))).size,
+  }), [daySchedules])
 
   const minuteNow = new Date().getHours() * 60 + new Date().getMinutes()
   const todaySelected = selectedDay.toLowerCase() === dashboard.today.toLowerCase()
@@ -48,6 +55,11 @@ export function FacultyMobileSchedule({ dashboard, onShowSummary }: { dashboard:
         <Text style={styles.scheduleDayTitle}>{selectedDay}</Text>
         <Text style={styles.scheduleCount}>{daySchedules.length} {daySchedules.length === 1 ? 'class' : 'classes'}</Text>
       </View>
+      <View style={styles.dayStats}>
+        <DayStat label="Subjects" value={dayStats.subjects} />
+        <DayStat label="Teaching hours" value={`${formatHours(dayStats.hours)}h`} />
+        <DayStat label="Sections" value={dayStats.sections} />
+      </View>
       {daySchedules.length ? daySchedules.map((item, index) => <DailyClassCard key={`${item.id}-${index}`} item={item} index={index} onPress={() => setSelectedClass(item)} />) : <View style={styles.dayEmpty}>
         <Text style={styles.emptyTitle}>No classes scheduled</Text>
         <Text style={styles.emptyCopy}>There are no faculty schedule entries for {selectedDay}.</Text>
@@ -60,6 +72,17 @@ export function FacultyMobileSchedule({ dashboard, onShowSummary }: { dashboard:
     <Pressable style={styles.summaryButton} onPress={onShowSummary}><Text style={styles.summaryButtonText}>▤  Show Summary of Courses</Text><Text style={styles.summaryChevron}>›</Text></Pressable>
     <Text style={styles.scheduleReadOnly}>Your schedule is view only. Contact your department chair for changes.</Text>
   </>
+}
+
+function DayStat({ label, value }: { label: string; value: string | number }) {
+  return <View style={styles.dayStat}>
+    <Text style={styles.dayStatValue}>{value}</Text>
+    <Text style={styles.dayStatLabel}>{label}</Text>
+  </View>
+}
+
+function formatHours(hours: number) {
+  return Number.isInteger(hours) ? String(hours) : hours.toFixed(1)
 }
 
 function DailyClassCard({ item, index, onPress }: { item: FacultySchedule; index: number; onPress: () => void }) {
