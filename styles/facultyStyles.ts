@@ -110,6 +110,10 @@ export const styles = StyleSheet.create({
   schedulePanelHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 13 },
   scheduleDayTitle: { color: COLORS.ink, fontSize: 17, fontWeight: '800', fontFamily: 'Inter_700Bold' },
   scheduleCount: { color: COLORS.muted, fontSize: 11, fontWeight: '600' },
+  dayStats: { flexDirection: 'row', gap: 8, marginBottom: 13 },
+  dayStat: { flex: 1, backgroundColor: '#F2F5FA', borderRadius: 11, paddingHorizontal: 8, paddingVertical: 10 },
+  dayStatValue: { color: COLORS.blue, fontSize: 15, fontWeight: '800', fontFamily: 'Inter_700Bold' },
+  dayStatLabel: { color: '#7E8DA4', fontSize: 9, marginTop: 4 },
   dayEmpty: { alignItems: 'center', paddingVertical: 25 },
   dailyClassRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 7, borderBottomWidth: 1, borderColor: '#EDF1F6' },
   dailyClassTime: { width: 78, color: '#8291AA', fontSize: 12, lineHeight: 17, fontWeight: '800' },
@@ -247,6 +251,7 @@ export const styles = StyleSheet.create({
   summaryLine: { flexDirection: 'row', justifyContent: 'space-between', gap: 8, paddingVertical: 6 },
   summaryLineLabel: { flex: 1, color: '#485971', fontSize: 10, fontWeight: '700' },
   summaryLineValue: { color: COLORS.ink, fontSize: 10, textAlign: 'right' },
+  summaryGroupHeading: { color: COLORS.ink, fontSize: 11, fontWeight: '900', fontFamily: 'Inter_700Bold', paddingTop: 9, paddingBottom: 2 },
   summaryLoadDivider: { height: 1, backgroundColor: '#E0E7EF', marginVertical: 5 },
   // Full-screen editable settings view and form controls.
   settingsOverlay: { ...StyleSheet.absoluteFill, zIndex: 40, backgroundColor: '#F7F9FC' },

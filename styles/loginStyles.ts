@@ -36,6 +36,8 @@ export const loginStyles = StyleSheet.create({
   buttonPressed: { backgroundColor: '#1D4ED8' },
   buttonDisabled: { opacity: 0.65 },
   buttonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  passkeyNotice: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, borderWidth: 1, borderColor: '#BFDBFE', backgroundColor: '#EFF6FF', borderRadius: 10, padding: 12, marginTop: 12 },
+  passkeyNoticeText: { flex: 1, color: '#1E3A8A', fontSize: 12, lineHeight: 18 },
   biometricButton: { height: 48, borderRadius: 10, borderWidth: 1, borderColor: '#BFDBFE', backgroundColor: '#EFF6FF', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 12 },
   biometricButtonText: { color: '#2563EB', fontSize: 14, fontWeight: '700' },
   note: { color: '#94A3B8', fontSize: 11, textAlign: 'center', marginTop: 18 },

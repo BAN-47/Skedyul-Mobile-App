@@ -61,8 +61,10 @@ export type FacultySchedule = {
   course_code: string | null
   course_name: string | null
   section: string | null
+  section_id?: string | null
   room: string | null
   day: string
+  shift?: 'day' | 'evening' | null
   start_time: string
   end_time: string
   units?: number | null
@@ -111,6 +113,11 @@ export type FacultyDashboard = {
     production?: string | null
     extension?: string | null
     research?: string | null
+    shift_breakdown?: {
+      total_preparations: number
+      day: { preparations: number; units: number; hours_per_week: number; max_hours: number }
+      evening: { preparations: number; units: number; hours_per_week: number; max_hours: number }
+    }
   }
   settings?: {
     session_timeout_minutes: number

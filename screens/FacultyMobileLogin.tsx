@@ -181,6 +181,13 @@ export function FacultyMobileLogin({
               </Text>
             </Pressable>
 
+            <View style={s.passkeyNotice} accessibilityRole="text">
+              <Ionicons name="information-circle-outline" size={18} color="#1D4ED8" />
+              <Text style={s.passkeyNoticeText}>
+                Passkeys registered in website Settings can’t be used to sign in to this mobile app yet. Sign in with your email and password. Mobile fingerprint or face sign-in is a separate option you can enable in app Settings.
+              </Text>
+            </View>
+
             {biometricEnabled && onBiometricSignIn ? (
               <Pressable
                 onPress={() => void onBiometricSignIn()}
