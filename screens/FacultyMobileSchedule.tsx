@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
-import type { FacultyDashboard, FacultySchedule } from '../lib/api'
+import type { FacultyDashboard, FacultySchedule, ScheduleShiftFilter } from '../lib/api'
 import { FacultyScheduleDetailSheet } from '../components/FacultyScheduleDetailSheet'
 import { styles } from '../styles/facultyStyles'
 import { formatFacultyName, formatTime } from '../utils/formatters'
@@ -14,21 +14,12 @@ const DAY_COLORS = [
 ]
 
 /** Faculty day view: the selected day's classes, a current/next room card, and course summary. */
-export function FacultyMobileSchedule({ dashboard, onShowSummary }: { dashboard: FacultyDashboard; onShowSummary: () => void }) {
-  const initialDay = DAYS.find(day => day.toLowerCase() === dashboard.today.toLowerCase()) || DAYS[0]
-  const [selectedDay, setSelectedDay] = useState(initialDay)
+export function FacultyMobileSchedule({ dashboard, selectedDay, onSelectDay, selectedShift, onSelectShift, onShowSummary }: { dashboard: FacultyDashboard; selectedDay: string; onSelectDay: (day: string) => void; selectedShift: ScheduleShiftFilter; onSelectShift: (shift: ScheduleShiftFilter) => void; onShowSummary: () => void }) {
   const [selectedClass, setSelectedClass] = useState<FacultySchedule | null>(null)
-  const daySchedules = useMemo(() => dashboard.schedules
+  const allDaySchedules = useMemo(() => dashboard.schedules
     .filter(item => item.day.toLowerCase() === selectedDay.toLowerCase())
     .sort((a, b) => timeToMinutes(a.start_time) - timeToMinutes(b.start_time)), [dashboard.schedules, selectedDay])
-  const dayStats = useMemo(() => ({
-    subjects: new Set(daySchedules.map(item => item.course_code || item.course_name).filter(Boolean)).size,
-    hours: daySchedules.reduce((total, item) => total + Math.max(0, timeToMinutes(item.end_time) - timeToMinutes(item.start_time)) / 60, 0),
-    sections: new Set(daySchedules
-      .map(item => item.section_id || item.section?.trim())
-      .filter((section): section is string => Boolean(section))).size,
-  }), [daySchedules])
-
+  const daySchedules = useMemo(() => allDaySchedules.filter(item => matchesShift(item, selectedShift)), [allDaySchedules, selectedShift])
   const minuteNow = new Date().getHours() * 60 + new Date().getMinutes()
   const todaySelected = selectedDay.toLowerCase() === dashboard.today.toLowerCase()
   const activeClass = todaySelected ? daySchedules.find(item => minuteNow >= timeToMinutes(item.start_time) && minuteNow < timeToMinutes(item.end_time)) : undefined
@@ -44,8 +35,14 @@ export function FacultyMobileSchedule({ dashboard, onShowSummary }: { dashboard:
       <Text style={styles.scheduleWelcomeNote}>Your faculty schedule and room assignments</Text>
     </View>
 
+    <View style={styles.shiftFilterRow}>
+      <ShiftButton title="All" value="all" selected={selectedShift} onSelect={onSelectShift} />
+      <ShiftButton title="Day" value="day" selected={selectedShift} onSelect={onSelectShift} />
+      <ShiftButton title="Evening" value="evening" selected={selectedShift} onSelect={onSelectShift} />
+    </View>
+
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayTabs} contentContainerStyle={styles.dayTabsContent}>
-      {DAYS.map(day => <Pressable key={day} onPress={() => setSelectedDay(day)} style={[styles.dayTab, selectedDay === day && styles.dayTabActive]}>
+      {DAYS.map(day => <Pressable key={day} onPress={() => onSelectDay(day)} style={[styles.dayTab, selectedDay === day && styles.dayTabActive]}>
         <Text style={[styles.dayTabText, selectedDay === day && styles.dayTabTextActive]}>{day}</Text>
       </Pressable>)}
     </ScrollView>
@@ -54,11 +51,6 @@ export function FacultyMobileSchedule({ dashboard, onShowSummary }: { dashboard:
       <View style={styles.schedulePanelHeading}>
         <Text style={styles.scheduleDayTitle}>{selectedDay}</Text>
         <Text style={styles.scheduleCount}>{daySchedules.length} {daySchedules.length === 1 ? 'class' : 'classes'}</Text>
-      </View>
-      <View style={styles.dayStats}>
-        <DayStat label="Subjects" value={dayStats.subjects} />
-        <DayStat label="Teaching hours" value={`${formatHours(dayStats.hours)}h`} />
-        <DayStat label="Sections" value={dayStats.sections} />
       </View>
       {daySchedules.length ? daySchedules.map((item, index) => <DailyClassCard key={`${item.id}-${index}`} item={item} index={index} onPress={() => setSelectedClass(item)} />) : <View style={styles.dayEmpty}>
         <Text style={styles.emptyTitle}>No classes scheduled</Text>
@@ -74,15 +66,17 @@ export function FacultyMobileSchedule({ dashboard, onShowSummary }: { dashboard:
   </>
 }
 
-function DayStat({ label, value }: { label: string; value: string | number }) {
-  return <View style={styles.dayStat}>
-    <Text style={styles.dayStatValue}>{value}</Text>
-    <Text style={styles.dayStatLabel}>{label}</Text>
-  </View>
+function ShiftButton({ title, value, selected, onSelect }: { title: string; value: ScheduleShiftFilter; selected: ScheduleShiftFilter; onSelect: (value: ScheduleShiftFilter) => void }) {
+  const active = value === selected
+  return <Pressable onPress={() => onSelect(value)} style={[styles.shiftFilterButton, active && styles.shiftFilterButtonActive]} accessibilityRole="button" accessibilityState={{ selected: active }}>
+    <Text style={[styles.shiftFilterButtonText, active && styles.shiftFilterButtonTextActive]}>{title}</Text>
+  </Pressable>
 }
 
-function formatHours(hours: number) {
-  return Number.isInteger(hours) ? String(hours) : hours.toFixed(1)
+function matchesShift(item: FacultySchedule, shift: ScheduleShiftFilter) {
+  if (shift === 'all') return true
+  const actualShift = item.shift || (timeToMinutes(item.start_time) >= 16 * 60 ? 'evening' : 'day')
+  return actualShift === shift
 }
 
 function DailyClassCard({ item, index, onPress }: { item: FacultySchedule; index: number; onPress: () => void }) {

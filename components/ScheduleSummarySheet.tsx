@@ -10,7 +10,7 @@ export function ScheduleSummarySheet({ dashboard, onClose }: { dashboard: Facult
   const evening = shifts?.evening
   const totalPreparations = shifts?.total_preparations ?? null
   const totalUnits = day && evening
-    ? formatNumber(day.units + evening.units)
+    ? formatNumber(Number(day.units) + Number(evening.units))
     : String(dashboard.load.units ?? sumUnits(courses))
   const totalHours = day && evening ? day.hours_per_week + evening.hours_per_week : dashboard.load.hours_per_week ?? dashboard.load.hours
   return (
@@ -67,7 +67,7 @@ function getCourseRows(schedules: FacultySchedule[]) {
 }
 
 function sumUnits(courses: FacultySchedule[]) {
-  const total = courses.reduce((sum, course) => sum + (course.units || 0), 0)
+  const total = courses.reduce((sum, course) => sum + (Number(course.units) || 0), 0)
   return total || '—'
 }
 
@@ -80,5 +80,7 @@ function SummaryHeading({ title }: { title: string }) {
 }
 
 function formatNumber(value: number) {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1)
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return '0'
+  return Number.isInteger(parsed) ? String(parsed) : parsed.toFixed(1)
 }

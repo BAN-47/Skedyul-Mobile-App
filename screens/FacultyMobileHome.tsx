@@ -12,8 +12,10 @@ import { FacultyMobileSchedule } from './FacultyMobileSchedule'
 import { FacultyMobileSettings } from './FacultyMobileSettings'
 import { FacultyMobileSubject } from './FacultyMobileSubject'
 import { COLORS, styles } from '../styles/facultyStyles'
+import type { ScheduleShiftFilter } from '../lib/api'
 
 type FacultyTab = 'schedule' | 'subjects' | 'notifications'
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 /** Shared faculty layout: header, the selected faculty screen, and bottom navigation. */
 export function FacultyMobileHome({ dashboard, busy, refreshing, error, onRefresh, onSignOut, onSaveProfile, onChangePassword, onSaveSecurity, biometricEnabled, onToggleBiometricSignIn, onSaveNotifications, onUploadFacultyPhoto, onRemoveFacultyPhoto }: {
@@ -36,16 +38,18 @@ export function FacultyMobileHome({ dashboard, busy, refreshing, error, onRefres
   const [profileOpen, setProfileOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [summaryOpen, setSummaryOpen] = useState(false)
+  const [selectedDay, setSelectedDay] = useState(() => WEEKDAYS.find(day => day.toLowerCase() === dashboard.today.toLowerCase()) || WEEKDAYS[0])
+  const [selectedShift, setSelectedShift] = useState<ScheduleShiftFilter>('all')
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="light" />
       <View style={styles.homeRoot}>
-        <FacultyHeader dashboard={dashboard} onOpenProfile={() => setProfileOpen(true)} />
+        <FacultyHeader dashboard={dashboard} selectedDay={selectedDay} selectedShift={selectedShift} onOpenProfile={() => setProfileOpen(true)} />
         {error ? <View style={styles.homeError}><ErrorBanner message={error} /></View> : null}
         <ScrollView key={tab} style={styles.homeScroll} contentContainerStyle={styles.homeScrollContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={COLORS.blue} />}>
-          {tab === 'schedule' ? <FacultyMobileSchedule dashboard={dashboard} onShowSummary={() => setSummaryOpen(true)} /> : null}
+          {tab === 'schedule' ? <FacultyMobileSchedule dashboard={dashboard} selectedDay={selectedDay} onSelectDay={setSelectedDay} selectedShift={selectedShift} onSelectShift={setSelectedShift} onShowSummary={() => setSummaryOpen(true)} /> : null}
           {tab === 'subjects' ? <FacultyMobileSubject dashboard={dashboard} /> : null}
           {tab === 'notifications' ? <FacultyMobileNotifications dashboard={dashboard} /> : null}
         </ScrollView>

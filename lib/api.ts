@@ -67,11 +67,13 @@ export type FacultySchedule = {
   shift?: 'day' | 'evening' | null
   start_time: string
   end_time: string
-  units?: number | null
-  student_count?: number | null
-  lecture_hours?: number | null
-  lab_hours?: number | null
+  units?: number | string | null
+  student_count?: number | string | null
+  lecture_hours?: number | string | null
+  lab_hours?: number | string | null
 }
+
+export type ScheduleShiftFilter = 'all' | 'day' | 'evening'
 
 export type FacultyProfile = {
   name: string

@@ -5,7 +5,7 @@
     "slug": "Skedyul-Mobile-App",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/skedyul-icon-foreground.png",
+    "icon": "./assets/skedyul-app-icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/skedyul-splash-icon.png",
@@ -22,9 +22,8 @@
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#19316D",
-        "foregroundImage": "./assets/skedyul-icon-foreground.png",
-        "backgroundImage": "./assets/skedyul-icon-background.png",
-        "monochromeImage": "./assets/skedyul-icon-monochrome.png"
+        "foregroundImage": "./assets/skedyul-android-foreground.png",
+        "monochromeImage": "./assets/skedyul-android-monochrome.png"
       },
       "permissions": [
         "android.permission.USE_BIOMETRIC",
@@ -32,7 +31,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/skedyul-favicon.png"
+      "favicon": "./assets/skedyul-web-favicon.png"
     },
     "plugins": [
       [

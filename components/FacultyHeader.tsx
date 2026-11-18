@@ -1,5 +1,5 @@
 import { Image, Pressable, Text, View } from 'react-native'
-import { facultyImageUrl, type FacultyDashboard } from '../lib/api'
+import { facultyImageUrl, type FacultyDashboard, type ScheduleShiftFilter } from '../lib/api'
 import { styles } from '../styles/facultyStyles'
 import { getInitials } from '../utils/formatters'
 
@@ -7,11 +7,20 @@ function HeaderStat({ label, value }: { label: string; value: string }) {
   return <View style={styles.headerStat}><Text style={styles.headerStatLabel}>{label}</Text><Text style={styles.headerStatValue}>{value}</Text></View>
 }
 
-export function FacultyHeader({ dashboard, onOpenProfile }: { dashboard: FacultyDashboard; onOpenProfile: () => void }) {
+export function FacultyHeader({ dashboard, selectedDay, selectedShift, onOpenProfile }: { dashboard: FacultyDashboard; selectedDay: string; selectedShift: ScheduleShiftFilter; onOpenProfile: () => void }) {
   const currentHour = new Date().getHours()
   const greeting = currentHour < 12 ? 'morning' : currentHour < 18 ? 'afternoon' : 'evening'
   const dateLabel = new Date().toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric' })
-  const sectionCount = new Set(dashboard.schedules.map(item => item.section).filter(Boolean)).size
+  const daySchedules = dashboard.schedules.filter(item => item.day.toLowerCase() === selectedDay.toLowerCase() && matchesShift(item, selectedShift))
+  const sectionCount = new Set(daySchedules.map(item => item.section_id || item.section?.trim()).filter(Boolean)).size
+  const subjectCount = new Set(daySchedules.map(item => item.course_code || item.course_name).filter(Boolean)).size
+  const teachingHours = daySchedules.reduce((total, item) => {
+    const toMinutes = (time: string) => {
+      const [hours = '0', minutes = '0'] = time.split(':')
+      return Number(hours) * 60 + Number(minutes)
+    }
+    return total + Math.max(0, toMinutes(item.end_time) - toMinutes(item.start_time)) / 60
+  }, 0)
 
   return (
     <View style={styles.homeHeader}>
@@ -57,12 +66,18 @@ export function FacultyHeader({ dashboard, onOpenProfile }: { dashboard: Faculty
       </View>
       <View style={styles.headerStats}>
         <HeaderStat
-          label="Teaching Load"
-          value={`${dashboard.load.hours} hrs`}
+          label={`${selectedDay}${selectedShift === 'all' ? '' : ` ${selectedShift === 'day' ? 'Day' : 'Evening'}`} Teaching Load`}
+          value={`${Number.isInteger(teachingHours) ? teachingHours : teachingHours.toFixed(1)} hrs`}
         />
-        <HeaderStat label="Subjects" value={String(dashboard.subject_count)} />
+        <HeaderStat label="Subjects" value={String(subjectCount)} />
         <HeaderStat label="Sections" value={String(sectionCount)} />
       </View>
     </View>
   );
+}
+
+function matchesShift(item: FacultyDashboard['schedules'][number], shift: ScheduleShiftFilter) {
+  if (shift === 'all') return true
+  const actualShift = item.shift || (Number(item.start_time.split(':')[0]) >= 16 ? 'evening' : 'day')
+  return actualShift === shift
 }
